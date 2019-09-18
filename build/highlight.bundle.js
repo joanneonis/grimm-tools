@@ -152,23 +152,56 @@ function timeStampToTime(unix_timestamp) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/loadJSON */ "./helpers/loadJSON.js");
 
-var storyIndex;
-var storyCount = 209; // 209
-
 var animalData;
+
+function handleFileSelect(evt) {
+  var files = evt.target.files; // FileList object
+  // use the 1st file from the list
+
+  var f = files[0];
+  var reader = new FileReader(); // Closure to capture the file information.
+
+  reader.onload = function () {
+    return function (e) {
+      animalData = JSON.parse(e.target.result);
+      console.log('uploaded', animalData);
+      listAnimals(animalData);
+    };
+  }(f); // Read in the image file as a data URL.
+
+
+  reader.readAsText(f);
+}
+
+document.getElementById('upload').addEventListener('change', handleFileSelect, false);
+/*
+	THE REST
+*/
+
+var storyIndex;
+var storyCount = 10; // 209
+
+var storyMin = 0;
 var stories = [];
 var storiesCombined = '';
 var animalCounts = [];
-var fullTextContainer = document.querySelector('.stories-combined');
-Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/stories/index.json', function (response) {
-  storyIndex = JSON.parse(response);
-}, 'json');
-Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/animals/animals.json', function (response) {
-  animalData = JSON.parse(response);
+var fullTextContainer = document.querySelector('.stories-combined'); // let storyCount = document.getElementById('upload');
+
+document.getElementById('storyMax').addEventListener('change', function (e) {
+  storyCount = e.srcElement.value;
+}, false);
+document.getElementById('storyMin').addEventListener('change', function (e) {
+  storyMin = e.srcElement.value;
+}, false);
+document.getElementById('load').addEventListener('click', function () {
   loadStories();
-}, 'json');
+});
 
 function loadStories() {
+  Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/stories/index.json', function (response) {
+    storyIndex = JSON.parse(response);
+  }, 'json');
+
   var _loop = function _loop(i) {
     Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])("../../assets/stories/".concat(Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["pad"])(i + 1, 3), ".txt"), function (response) {
       // store seperate stories
@@ -184,14 +217,14 @@ function loadStories() {
     });
   };
 
-  for (var i = 0; i < storyCount; i++) {
+  for (var i = storyMin; i < storyCount; i++) {
     _loop(i);
   }
 }
 
 function init() {
   fullTextContainer.innerHTML = storiesCombined;
-  listAnimals(animalData);
+  document.querySelector('.upload').style.display = 'block';
 } //?-----------
 
 

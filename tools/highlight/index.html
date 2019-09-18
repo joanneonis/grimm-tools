@@ -8,6 +8,25 @@
 	<link rel="stylesheet" href="./style.css">
 </head>
 <body>
+	<div class="storycount">
+		<label for="storyMin">
+			story min
+				<input type="number" id="storyMin" name="storyMin" value="0"
+				min="0" max="209">
+		</label>
+		<label for="storyMax">
+			story max
+				<input type="number" id="storyMax" name="storyMax"
+				value="10"
+				min="0" max="209">
+		</label>
+		<button id="load">Load stories</button>
+	</div>
+	<div class="upload" style="display: none">
+		<br>
+		<input type="file" id="upload" name="upload">
+		<br>
+	</div>
 	<section class="animal-list">
 		<div class="stories">
 			<div class="stories-combined"></div>

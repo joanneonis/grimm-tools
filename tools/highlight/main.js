@@ -1,25 +1,62 @@
 import { loadJSON, pad } from '../../helpers/loadJSON';
 
-let storyIndex;
-let storyCount = 209; // 209
 let animalData;
+
+function handleFileSelect(evt) {
+	var files = evt.target.files; // FileList object
+
+	// use the 1st file from the list
+	let f = files[0];
+
+	var reader = new FileReader();
+
+	// Closure to capture the file information.
+	reader.onload = (() => {
+			return function(e) {
+				animalData = JSON.parse(e.target.result);
+				console.log('uploaded', animalData);
+				listAnimals(animalData);
+			};
+		})(f);
+
+		// Read in the image file as a data URL.
+		reader.readAsText(f);
+}
+
+document.getElementById('upload').addEventListener('change', handleFileSelect, false);
+
+/*
+	THE REST
+*/
+
+let storyIndex;
+let storyCount = 10; // 209
+let storyMin = 0;
 let stories = [];
 let storiesCombined = '';
 let animalCounts = [];
 
 const fullTextContainer = document.querySelector('.stories-combined');
+// let storyCount = document.getElementById('upload');
 
-loadJSON('../../assets/stories/index.json', (response) => {
-  storyIndex = JSON.parse(response);
-}, 'json');
+document.getElementById('storyMax').addEventListener('change', function(e) {
+	storyCount = e.srcElement.value;
+}, false);
 
-loadJSON('../../assets/animals/animals.json', (response) => {
-  animalData = JSON.parse(response);
-  loadStories();
-}, 'json');
+document.getElementById('storyMin').addEventListener('change', function(e) {
+	storyMin = e.srcElement.value;
+}, false);
+
+document.getElementById('load').addEventListener('click', function() {
+	loadStories();
+});
 
 function loadStories() {
-  for (let i = 0; i < storyCount; i++) {
+	loadJSON('../../assets/stories/index.json', (response) => {
+		storyIndex = JSON.parse(response);
+	}, 'json');
+
+  for (let i = storyMin; i < storyCount; i++) {
     loadJSON(`../../assets/stories/${pad(i + 1, 3)}.txt`, (response) => {
       // store seperate stories
       stories.push(response);
@@ -43,8 +80,8 @@ function loadStories() {
 
 
 function init() {
-  fullTextContainer.innerHTML = storiesCombined;
-  listAnimals(animalData);
+	fullTextContainer.innerHTML = storiesCombined;
+	document.querySelector('.upload').style.display = 'block';
 }
 
 //?-----------
