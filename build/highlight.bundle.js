@@ -86,14 +86,158 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./helpers/loadJSON.js":
+/*!*****************************!*\
+  !*** ./helpers/loadJSON.js ***!
+  \*****************************/
+/*! exports provided: loadJSON, pad */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "loadJSON", function() { return loadJSON; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pad", function() { return pad; });
+function loadJSON(fileName, callback, type) {
+  var xobj = new XMLHttpRequest();
+
+  if (type === 'json') {
+    xobj.overrideMimeType("application/json");
+  }
+
+  xobj.open('GET', fileName, true);
+
+  xobj.onreadystatechange = function (e) {
+    if (xobj.readyState == 4 && xobj.status == "200") {
+      // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+      callback(xobj.responseText);
+      console.log("loaded ".concat(fileName, " - ").concat(timeStampToTime(e.timeStamp)));
+    }
+  };
+
+  xobj.send(null);
+}
+function pad(num, size) {
+  var s = num + "";
+
+  while (s.length < size) {
+    s = "0" + s;
+  }
+
+  return s;
+}
+
+function timeStampToTime(unix_timestamp) {
+  // Create a new JavaScript Date object based on the timestamp
+  // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+  var date = new Date(unix_timestamp * 1000); // Hours part from the timestamp
+
+  var hours = date.getHours(); // Minutes part from the timestamp
+
+  var minutes = "0" + date.getMinutes(); // Seconds part from the timestamp
+
+  var seconds = "0" + date.getSeconds();
+  return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+}
+
+/***/ }),
+
 /***/ "./tools/highlight/main.js":
 /*!*********************************!*\
   !*** ./tools/highlight/main.js ***!
   \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-console.log('highlight');
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/loadJSON */ "./helpers/loadJSON.js");
+
+var storyIndex;
+var storyCount = 209; // 209
+
+var animalData;
+var stories = [];
+var storiesCombined = '';
+var animalCounts = [];
+var fullTextContainer = document.querySelector('.stories-combined');
+Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/stories/index.json', function (response) {
+  storyIndex = JSON.parse(response);
+}, 'json');
+Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/animals/animals.json', function (response) {
+  animalData = JSON.parse(response);
+  loadStories();
+}, 'json');
+
+function loadStories() {
+  var _loop = function _loop(i) {
+    Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])("../../assets/stories/".concat(Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["pad"])(i + 1, 3), ".txt"), function (response) {
+      // store seperate stories
+      stories.push(response);
+
+      if (i === 0) {
+        storiesCombined = "<span class=\"story\"><span class=\"title\">".concat(storyIndex[i].title, "</span>").concat(response, "</span>");
+      } else {
+        storiesCombined = "\n          ".concat(storiesCombined, "\n          <span class=\"story\">\n            <span class=\"title\">").concat(storyIndex[i].title, "</span>\n            ").concat(response, "\n          </span>\n        ");
+      }
+
+      if (i === storyCount - 1) init();
+    });
+  };
+
+  for (var i = 0; i < storyCount; i++) {
+    _loop(i);
+  }
+}
+
+function init() {
+  fullTextContainer.innerHTML = storiesCombined;
+  listAnimals(animalData);
+} //?-----------
+
+
+function highLight(target, textContainer, i) {
+  var item = textContainer;
+  var text = item.innerHTML; // textcontent
+
+  var featuredWords = item.querySelectorAll('.highlight');
+  var words = Array.prototype.slice.call(featuredWords, 0).map(function (node) {
+    return node.textContent;
+  }); // first highlight
+
+  var regex = new RegExp('\\b(' + target + ')\\b', 'ig', 'a');
+  text = text.replace(regex, "<span class=\"highlight\">$1</span>"); // text = text.replace(/target/g, "a");
+
+  var countOccurances = ((text || '').match(regex) || []).length;
+  animalCounts[i].count = countOccurances; // put the previous words back 
+  // words.forEach(function(word) {
+  //   console.log(words);
+  //   text = text.replace(word, `<span class="highlight">${word}</span>`); 
+  // });
+
+  item.innerHTML = text;
+} //?------------------
+
+
+function listAnimals(data) {
+  var container = document.querySelector('#animals');
+  data.forEach(function (text, i) {
+    var storyContainer = document.querySelector('.stories-combined'); //? let randomColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16); // leuk voor later
+
+    animalCounts.push({
+      animal: text
+    });
+    highLight(text, storyContainer, i);
+  });
+  animalCounts.sort(function (a, b) {
+    return a.count > b.count ? -1 : 1;
+  });
+  animalCounts.forEach(function (item, i) {
+    var listItem = document.createElement("tr");
+    listItem.classList.add("animal-".concat(i));
+    listItem.innerHTML = "\n      <td>".concat(item.animal, "</td>\n      <td>").concat(item.count, "</td>\n    ");
+    container.appendChild(listItem);
+  });
+}
 
 /***/ })
 
