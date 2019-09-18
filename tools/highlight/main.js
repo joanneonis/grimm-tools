@@ -87,6 +87,7 @@ function init() {
 //?-----------
 
 function highLight(target, textContainer, i) {
+	let randomColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
   var item = textContainer;
   var text = item.innerHTML; // textcontent
   var featuredWords = item.querySelectorAll('.highlight');
@@ -97,7 +98,7 @@ function highLight(target, textContainer, i) {
   
   // first highlight
   var regex = new RegExp('\\b(' + target + ')\\b', 'ig', 'a');
-  text = text.replace(regex, `<span class="highlight">$1</span>`);
+  text = text.replace(regex, `<span class="highlight" style="background-color: ${randomColor}">$1</span>`);
   // text = text.replace(/target/g, "a");
 
   var countOccurances = ((text || '').match(regex) || []).length;
@@ -121,7 +122,6 @@ function listAnimals(data) {
   
   data.forEach((text, i) => {
     let storyContainer = document.querySelector('.stories-combined'); 
-    //? let randomColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16); // leuk voor later
     
     animalCounts.push({ animal: text });
     highLight(text, storyContainer, i);
