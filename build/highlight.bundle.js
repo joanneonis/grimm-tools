@@ -153,6 +153,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/loadJSON */ "./helpers/loadJSON.js");
 
 var animalData;
+var totalToSearch;
+var progress = 0;
 
 function handleFileSelect(evt) {
   var files = evt.target.files; // FileList object
@@ -166,6 +168,7 @@ function handleFileSelect(evt) {
       animalData = JSON.parse(e.target.result);
       console.log('uploaded', animalData);
       listAnimals(animalData);
+      totalToSearch = animalData.length;
     };
   }(f); // Read in the image file as a data URL.
 
@@ -232,6 +235,7 @@ function highLight(target, textContainer, i) {
   var randomColor = '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
   var item = textContainer;
   var text = item.innerHTML; // textcontent
+  // var textContent = item.textContent;
 
   var featuredWords = item.querySelectorAll('.highlight');
   var words = Array.prototype.slice.call(featuredWords, 0).map(function (node) {
@@ -242,12 +246,7 @@ function highLight(target, textContainer, i) {
   text = text.replace(regex, "<span class=\"highlight\" style=\"background-color: ".concat(randomColor, "\">$1</span>")); // text = text.replace(/target/g, "a");
 
   var countOccurances = ((text || '').match(regex) || []).length;
-  animalCounts[i].count = countOccurances; // put the previous words back 
-  // words.forEach(function(word) {
-  //   console.log(words);
-  //   text = text.replace(word, `<span class="highlight">${word}</span>`); 
-  // });
-
+  animalCounts[i].count = countOccurances;
   item.innerHTML = text;
 } //?------------------
 
@@ -260,6 +259,9 @@ function listAnimals(data) {
       animal: text
     });
     highLight(text, storyContainer, i);
+    var d = new Date();
+    var n = d.getTime();
+    updateProgress(i, data.length);
   });
   animalCounts.sort(function (a, b) {
     return a.count > b.count ? -1 : 1;
@@ -269,7 +271,16 @@ function listAnimals(data) {
     listItem.classList.add("animal-".concat(i));
     listItem.innerHTML = "\n      <td>".concat(item.animal, "</td>\n      <td>").concat(item.count, "</td>\n    ");
     container.appendChild(listItem);
-  });
+  }); // done hack
+
+  updateProgress(1, 1);
+}
+
+function updateProgress(progress, total) {
+  // let bar = document.querySelector('.progress_bar');
+  var progressPerc = 100 - (progress - total) / total * -100; // bar.style.width = `${progressPerc}%`;
+
+  console.log("loaded ".concat(progressPerc.toFixed(1), "% of the search"));
 }
 
 /***/ })

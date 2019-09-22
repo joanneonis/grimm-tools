@@ -2,6 +2,9 @@ import { loadJSON, pad } from '../../helpers/loadJSON';
 
 let animalData;
 
+let totalToSearch;
+let progress = 0;
+
 function handleFileSelect(evt) {
 	var files = evt.target.files; // FileList object
 
@@ -16,6 +19,8 @@ function handleFileSelect(evt) {
 				animalData = JSON.parse(e.target.result);
 				console.log('uploaded', animalData);
 				listAnimals(animalData);
+
+				totalToSearch = animalData.length;
 			};
 		})(f);
 
@@ -89,7 +94,8 @@ function init() {
 function highLight(target, textContainer, i) {
 	let randomColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
   var item = textContainer;
-  var text = item.innerHTML; // textcontent
+	var text = item.innerHTML; // textcontent
+	// var textContent = item.textContent;
   var featuredWords = item.querySelectorAll('.highlight');
   
   var words = Array.prototype.slice.call(featuredWords, 0).map(function(node) {
@@ -104,12 +110,6 @@ function highLight(target, textContainer, i) {
   var countOccurances = ((text || '').match(regex) || []).length;
 
   animalCounts[i].count = countOccurances;
-
-  // put the previous words back 
-  // words.forEach(function(word) {
-  //   console.log(words);
-  //   text = text.replace(word, `<span class="highlight">${word}</span>`); 
-  // });
   
   item.innerHTML = text;
 }
@@ -119,12 +119,16 @@ function highLight(target, textContainer, i) {
 function listAnimals(data) {
   let container = document.querySelector('#animals');
 
-  
   data.forEach((text, i) => {
     let storyContainer = document.querySelector('.stories-combined'); 
     
     animalCounts.push({ animal: text });
-    highLight(text, storyContainer, i);
+		highLight(text, storyContainer, i);
+
+		var d = new Date();
+		var n = d.getTime();
+
+		updateProgress(i, data.length);
   });
   
   animalCounts.sort((a, b) => (a.count > b.count) ? -1 : 1);
@@ -137,6 +141,17 @@ function listAnimals(data) {
       <td>${item.count}</td>
     `;
 
-    container.appendChild(listItem);
-  });
+		container.appendChild(listItem);
+	});
+	
+	// done hack
+	updateProgress(1, 1);
+} 
+
+function updateProgress(progress, total) {
+	// let bar = document.querySelector('.progress_bar');
+	
+	let progressPerc = 100 - (((progress - total) / total ) * -100);
+	// bar.style.width = `${progressPerc}%`;
+	console.log(`loaded ${progressPerc.toFixed(1)}% of the search`);
 }
