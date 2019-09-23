@@ -131,7 +131,7 @@ function listAnimals(data) {
 		updateProgress(i, data.length);
   });
   
-  animalCounts.sort((a, b) => (a.count > b.count) ? -1 : 1);
+  // animalCounts.sort((a, b) => (a.count > b.count) ? -1 : 1);
   animalCounts.forEach((item, i) => {
     var listItem = document.createElement("tr");
     listItem.classList.add(`animal-${i}`);

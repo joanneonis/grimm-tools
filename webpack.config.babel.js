@@ -6,6 +6,7 @@ export default {
     entry: {
       test: path.join(__dirname, 'main.js'),
       highlight: path.join(__dirname, './tools/highlight/main.js'),
+      arrayStyle: path.join(__dirname, './tools/findArray/main.js'),
     },
     output: {
         path: path.join(__dirname, 'build'),

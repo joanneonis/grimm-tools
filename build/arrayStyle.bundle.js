@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/highlight/main.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/findArray/main.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -141,9 +141,9 @@ function timeStampToTime(unix_timestamp) {
 
 /***/ }),
 
-/***/ "./tools/highlight/main.js":
+/***/ "./tools/findArray/main.js":
 /*!*********************************!*\
-  !*** ./tools/highlight/main.js ***!
+  !*** ./tools/findArray/main.js ***!
   \*********************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -152,136 +152,140 @@ function timeStampToTime(unix_timestamp) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/loadJSON */ "./helpers/loadJSON.js");
 
-var animalData;
-var totalToSearch;
-var progress = 0;
-
-function handleFileSelect(evt) {
-  var files = evt.target.files; // FileList object
-  // use the 1st file from the list
-
-  var f = files[0];
-  var reader = new FileReader(); // Closure to capture the file information.
-
-  reader.onload = function () {
-    return function (e) {
-      animalData = JSON.parse(e.target.result);
-      console.log('uploaded', animalData);
-      listAnimals(animalData);
-      totalToSearch = animalData.length;
-    };
-  }(f); // Read in the image file as a data URL.
-
-
-  reader.readAsText(f);
-}
-
-document.getElementById('upload').addEventListener('change', handleFileSelect, false);
-/*
-	THE REST
-*/
-
+var allStories = [];
 var storyIndex;
-var storyCount = 10; // 209
+var searchWords;
+var maxStoryCount = 10;
+/**
+ * Load stories titles
+ */
+// ! TODO to promise chain
 
-var storyMin = 0;
-var stories = [];
-var storiesCombined = '';
-var animalCounts = [];
-var fullTextContainer = document.querySelector('.stories-combined'); // let storyCount = document.getElementById('upload');
+Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/handFiltered/animals2.json', function (response) {
+  searchWords = JSON.parse(response);
+  loadIndexes();
+}, 'json');
 
-document.getElementById('storyMax').addEventListener('change', function (e) {
-  storyCount = e.srcElement.value;
-}, false);
-document.getElementById('storyMin').addEventListener('change', function (e) {
-  storyMin = e.srcElement.value;
-}, false);
-document.getElementById('load').addEventListener('click', function () {
-  loadStories();
-});
-
-function loadStories() {
+function loadIndexes() {
   Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/stories/index.json', function (response) {
     storyIndex = JSON.parse(response);
+    loadStories(maxStoryCount);
   }, 'json');
+}
+/**
+ * @param { Number } maxStories
+ * Load stories from 0 to maxStories
+ */
 
+
+function loadStories(maxStories) {
   var _loop = function _loop(i) {
     Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])("../../assets/stories/".concat(Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["pad"])(i + 1, 3), ".txt"), function (response) {
-      // store seperate stories
-      stories.push(response);
+      var normalisedStory = window.nlp(response).normalize().out('text');
+      normalisedStory = normalisedStory.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?!]/g, "");
+      var storyArray = normalisedStory.toString().split(' '); // normalisedStory.replace(/\s{2,}/g," ");
 
-      if (i === 0) {
-        storiesCombined = "<span class=\"story\"><span class=\"title\">".concat(storyIndex[i].title, "</span>").concat(response, "</span>");
-      } else {
-        storiesCombined = "\n          ".concat(storiesCombined, "\n          <span class=\"story\">\n            <span class=\"title\">").concat(storyIndex[i].title, "</span>\n            ").concat(response, "\n          </span>\n        ");
+      allStories.push({
+        title: storyIndex[i].title,
+        index: i,
+        story: response,
+        storyArray: storyArray,
+        storyLength: storyArray.length,
+        words: []
+      });
+
+      if (i === maxStories - 1) {
+        allStories.sort(function (a, b) {
+          return a.index < b.index ? -1 : 1;
+        });
+        init();
       }
 
-      if (i === storyCount - 1) init();
+      ;
     });
   };
 
-  for (var i = storyMin; i < storyCount; i++) {
+  for (var i = 0; i < maxStories; i++) {
     _loop(i);
   }
 }
+/**
+ * Runs when stories are loaded
+ */
+
 
 function init() {
-  fullTextContainer.innerHTML = storiesCombined;
-  document.querySelector('.upload').style.display = 'block';
-} //?-----------
-
-
-function highLight(target, textContainer, i) {
-  var randomColor = '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
-  var item = textContainer;
-  var text = item.innerHTML; // textcontent
-  // var textContent = item.textContent;
-
-  var featuredWords = item.querySelectorAll('.highlight');
-  var words = Array.prototype.slice.call(featuredWords, 0).map(function (node) {
-    return node.textContent;
-  }); // first highlight
-
-  var regex = new RegExp('\\b(' + target + ')\\b', 'ig', 'a');
-  text = text.replace(regex, "<span class=\"highlight\" style=\"background-color: ".concat(randomColor, "\">$1</span>")); // text = text.replace(/target/g, "a");
-
-  var countOccurances = ((text || '').match(regex) || []).length;
-  animalCounts[i].count = countOccurances;
-  item.innerHTML = text;
-} //?------------------
-
-
-function listAnimals(data) {
-  var container = document.querySelector('#animals');
-  data.forEach(function (text, i) {
-    var storyContainer = document.querySelector('.stories-combined');
-    animalCounts.push({
-      animal: text
-    });
-    highLight(text, storyContainer, i);
-    var d = new Date();
-    var n = d.getTime();
-    updateProgress(i, data.length);
-  }); // animalCounts.sort((a, b) => (a.count > b.count) ? -1 : 1);
-
-  animalCounts.forEach(function (item, i) {
-    var listItem = document.createElement("tr");
-    listItem.classList.add("animal-".concat(i));
-    listItem.innerHTML = "\n      <td>".concat(item.animal, "</td>\n      <td>").concat(item.count, "</td>\n    ");
-    container.appendChild(listItem);
-  }); // done hack
-
-  updateProgress(1, 1);
+  allStories.forEach(function (storyObj, index) {
+    startWordCounts(index);
+    wordsToHtml(index);
+  });
 }
 
-function updateProgress(progress, total) {
-  // let bar = document.querySelector('.progress_bar');
-  var progressPerc = 100 - (progress - total) / total * -100; // bar.style.width = `${progressPerc}%`;
+function startWordCounts(storyIndex) {
+  searchWords.forEach(function (wordToSearch, index) {
+    sentences(index, wordToSearch, storyIndex);
 
-  console.log("loaded ".concat(progressPerc.toFixed(1), "% of the search"));
+    if (index === searchWords.length - 1) {
+      allStories[storyIndex].words.sort(function (a, b) {
+        return a.count > b.count ? -1 : 1;
+      });
+    }
+  });
+}
+
+function wordsToHtml(storyIndex) {
+  var story = allStories[storyIndex];
+  var outer = document.createElement('section');
+  outer.classList.add('story-container');
+  var title = document.createElement('h3');
+  title.innerHTML = story.title;
+  var container = document.createElement("table");
+  container.classList.add("word-".concat(storyIndex));
+  container.innerHTML = "\n\t\t<tr>\n\t\t\t<th>ID</th>\n      <th>word</th>\n\t\t\t<th>count</th>\n\t\t\t<th>story length</th>\n      <th>senteces</th>\n    </tr>\n  ";
+  document.querySelector('.container').appendChild(outer);
+  outer.appendChild(title);
+  outer.appendChild(container);
+  story.words.forEach(function (word, i) {
+    var listItem = document.createElement("tr");
+    listItem.innerHTML = "\n\t\t\t<td>".concat(story.index, "</td>\n      <td>").concat(word.word, "</td>\n\t\t\t<td>").concat(word.count, "</td>\n\t\t\t<td>").concat(story.storyLength, "</td>\n\t\t\t\n\t\t\t<td class=\"sentences sentences-").concat(i, "\">\n\t\t\t\t<table>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<th>Index</th>\n\t\t\t\t\t\t<th>Sentence</th>\n\t\t\t\t\t</tr>\n\t\t\t\t</table>\n\t\t\t</td>\n\t\t");
+    document.querySelector(".word-".concat(storyIndex)).appendChild(listItem);
+    word.senteces.forEach(function (sentence, x) {
+      var item = document.createElement("tr");
+      item.innerHTML = "\n\t\t\t\t<td>".concat(word.indexes[x], "</td>\n\t\t\t\t<td>").concat(sentence, "</td>\n\t\t\t");
+      document.querySelector(".word-".concat(storyIndex, " .sentences-").concat(i, " table")).appendChild(item);
+    });
+  });
+}
+
+function sentences(i, searchFor, storyIndex) {
+  var story = allStories[storyIndex];
+  var indexes = getAllIndexes(story.storyArray, searchFor);
+  var count = indexes.length;
+  if (count === 0) return;
+  story.words.push({
+    word: searchFor,
+    count: count,
+    senteces: [],
+    indexes: indexes
+  });
+  var current = story.words.length - 1;
+  if (count === 0) return;
+  indexes.forEach(function (index) {
+    story.words[current].senteces.push("".concat(story.storyArray[index - 1], " ").concat(story.storyArray[index], " ").concat(story.storyArray[index + 1]));
+  });
+}
+
+function getAllIndexes(arr, val) {
+  var indexes = [];
+
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] === val) indexes.push(i);
+  }
+
+  return indexes;
 }
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=highlight.bundle.js.map
+//# sourceMappingURL=arrayStyle.bundle.js.map
