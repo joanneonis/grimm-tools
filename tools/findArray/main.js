@@ -3,18 +3,18 @@ import { loadJSON, pad } from '../../helpers/loadJSON';
 let allStories = [];
 let storyIndex;
 let searchWords;
-let maxStoryCount = 10; 
+let maxStoryCount = 209; 
 
 /**
  * Load stories titles
  */
 // ! TODO to promise chain
-loadJSON('../../assets/handFiltered/animals2.json', (response) => {
+loadJSON('../../assets/filterArrays/characters-names.json', (response) => {
 	searchWords = JSON.parse(response);
 
 	loadIndexes();
 }, 'json');
-
+ 
 function loadIndexes() {
 	loadJSON('../../assets/stories/index.json', (response) => {
 		storyIndex = JSON.parse(response);

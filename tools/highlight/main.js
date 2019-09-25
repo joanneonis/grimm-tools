@@ -35,7 +35,7 @@ document.getElementById('upload').addEventListener('change', handleFileSelect, f
 */
 
 let storyIndex;
-let storyCount = 10; // 209
+let storyCount = 209; // 209
 let storyMin = 0;
 let stories = [];
 let storiesCombined = '';

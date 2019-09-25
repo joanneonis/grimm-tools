@@ -155,13 +155,13 @@ __webpack_require__.r(__webpack_exports__);
 var allStories = [];
 var storyIndex;
 var searchWords;
-var maxStoryCount = 10;
+var maxStoryCount = 209;
 /**
  * Load stories titles
  */
 // ! TODO to promise chain
 
-Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/handFiltered/animals2.json', function (response) {
+Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/filterArrays/characters-names.json', function (response) {
   searchWords = JSON.parse(response);
   loadIndexes();
 }, 'json');

@@ -182,7 +182,7 @@ document.getElementById('upload').addEventListener('change', handleFileSelect, f
 */
 
 var storyIndex;
-var storyCount = 10; // 209
+var storyCount = 209; // 209
 
 var storyMin = 0;
 var stories = [];
