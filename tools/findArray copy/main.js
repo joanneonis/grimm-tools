@@ -3,11 +3,7 @@ import { loadJSON, pad } from '../../helpers/loadJSON';
 let allStories = [];
 let storyIndex;
 let searchWords;
-let maxStoryCount = 20; 
-let totalLines = 0;
-
-
-console.log('hallo?');
+let maxStoryCount = 209; 
 
 /**
  * Load stories titles
@@ -52,7 +48,7 @@ function loadStories(maxStories) {
   
       if (i === maxStories - 1) {
 				allStories.sort(function (a, b) {
-					return a.storyLength < b.storyLength ? -1 : 1;
+					return a.index < b.index ? -1 : 1;
 				});
 
 				init()
@@ -67,8 +63,7 @@ function loadStories(maxStories) {
 function init() {
 	allStories.forEach((storyObj, index) => {
 		startWordCounts(index);
-		// wordsToHtml(index);
-		wordsToOneTable(index);
+		wordsToHtml(index);
 	});
 }
 
@@ -82,32 +77,6 @@ function startWordCounts(storyIndex) {
 			});
 		}
 	});
-}
-
-function wordsToOneTable(storyIndex) {
-	let story = allStories[storyIndex];
-
-	let table = document.querySelector('.one-table');
-
-
-	story.words.forEach((word, i) => {
-		word.senteces.forEach((sentence, x) => {
-			var listItem = document.createElement("tr");
-			listItem.innerHTML = `
-				<td>${story.index}</td>
-				<td>${searchWords.indexOf(word.word)}</td>
-				<td>${word.word}</td>
-				<td>${word.count}</td>
-				<td>${story.storyLength}</td>
-				<td>${word.indexes[x]}</td>
-			`;
-			table.appendChild(listItem);
-
-			totalLines++;
-		});
-	});
-	
-	console.log(totalLines);
 }
 
 function wordsToHtml(storyIndex) {

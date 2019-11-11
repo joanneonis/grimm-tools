@@ -7,6 +7,8 @@ export default {
       test: path.join(__dirname, 'main.js'),
       highlight: path.join(__dirname, './tools/highlight/main.js'),
       arrayStyle: path.join(__dirname, './tools/findArray/main.js'),
+      sentences: path.join(__dirname, './tools/compromise/main.js'),
+      emoji: path.join(__dirname, './tools/emojicount/main.js'),
     },
     output: {
         path: path.join(__dirname, 'build'),

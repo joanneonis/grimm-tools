@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/findArray/main.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/compromise/main.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -141,168 +141,130 @@ function timeStampToTime(unix_timestamp) {
 
 /***/ }),
 
-/***/ "./tools/findArray/main.js":
-/*!*********************************!*\
-  !*** ./tools/findArray/main.js ***!
-  \*********************************/
+/***/ "./tools/compromise/main.js":
+/*!**********************************!*\
+  !*** ./tools/compromise/main.js ***!
+  \**********************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/loadJSON */ "./helpers/loadJSON.js");
+// sentences()
 
-var allStories = [];
-var storyIndex;
-var searchWords;
-var maxStoryCount = 20;
-var totalLines = 0;
-console.log('hallo?');
-/**
- * Load stories titles
- */
-// ! TODO to promise chain
+var storyCount = 209;
+var stories = {};
+var paragrahTable = {};
+var sentenceTable = {};
+var wordTable = {};
+var wordLengthsTable = {};
 
-Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/filterArrays/characters-names.json', function (response) {
-  searchWords = JSON.parse(response);
-  loadIndexes();
-}, 'json');
-
-function loadIndexes() {
-  Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/stories/index.json', function (response) {
-    storyIndex = JSON.parse(response);
-    loadStories(maxStoryCount);
-  }, 'json');
-}
-/**
- * @param { Number } maxStories
- * Load stories from 0 to maxStories
- */
-
-
-function loadStories(maxStories) {
-  var _loop = function _loop(i) {
-    Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])("../../assets/stories/".concat(Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["pad"])(i + 1, 3), ".txt"), function (response) {
-      var normalisedStory = window.nlp(response).normalize().out('text');
-      normalisedStory = normalisedStory.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?!]/g, "");
-      var storyArray = normalisedStory.toString().split(' '); // normalisedStory.replace(/\s{2,}/g," ");
-
-      allStories.push({
-        title: storyIndex[i].title,
-        index: i,
-        story: response,
-        storyArray: storyArray,
-        storyLength: storyArray.length,
-        words: []
-      });
-
-      if (i === maxStories - 1) {
-        allStories.sort(function (a, b) {
-          return a.storyLength < b.storyLength ? -1 : 1;
-        });
-        init();
-      }
-
-      ;
+var _loop = function _loop(i) {
+  Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])("../../assets/stories/".concat(Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["pad"])(i + 1, 3), ".txt"), function (response) {
+    var normalisedStory = window.nlp(response).normalize().out('text');
+    normalisedStory = normalisedStory.replace(/[,\/#!$%\^&\*;:{}=\-_`~()?!]/g, "");
+    var compromise = window.nlp(normalisedStory).normalize().sentences().data();
+    var paragraphTest = (response.match(/[\r\n]{2,}/gm) || '').length + 1;
+    var paragraphs = response.split(/[\r\n]{2,}/gm);
+    paragrahTable[i] = {
+      storyId: i,
+      paragraphCount: paragraphTest,
+      sentenceCount: compromise.length,
+      sentencesPerParagraph: []
+    };
+    var test = [];
+    wordLengthsTable[i] = {
+      storyId: i,
+      wordCountsPerSentence: []
+    };
+    paragraphs.forEach(function (paragraph, x) {
+      test.push(window.nlp(paragraph).sentences().data().length); //? Word stuff
+      // wordLengthsTable[i].wordCountsPerSentence.push([]);
+      // wordsPerSentence(window.nlp(paragraph).sentences().data().length, i , x, window.nlp(paragraph).sentences().data());
     });
-  };
-
-  for (var i = 0; i < maxStories; i++) {
-    _loop(i);
-  }
-}
-/**
- * Runs when stories are loaded
- */
-
-
-function init() {
-  allStories.forEach(function (storyObj, index) {
-    startWordCounts(index); // wordsToHtml(index);
-
-    wordsToOneTable(index);
+    paragrahTable[i].sentencesPerParagraph = test;
+    var container = document.querySelector('.test');
+    container.innerHTML = JSON.stringify(paragrahTable);
   });
+};
+
+for (var i = 0; i < storyCount; i++) {
+  _loop(i);
 }
 
-function startWordCounts(storyIndex) {
-  searchWords.forEach(function (wordToSearch, index) {
-    sentences(index, wordToSearch, storyIndex);
-
-    if (index === searchWords.length - 1) {
-      allStories[storyIndex].words.sort(function (a, b) {
-        return a.count > b.count ? -1 : 1;
-      });
-    }
+function wordsPerSentence(lenght, i, x, sentences) {
+  // wordLengthsTable[i][x]
+  Object.keys(sentences).forEach(function (z) {
+    var normalisedSentence = sentences[z].normal;
+    var words = normalisedSentence.split(" ");
+    wordLengthsTable[i].wordCountsPerSentence[x][z] = words.length; // console.log(i, x, lenght, words.length);
   });
+  console.log(wordLengthsTable);
+  var container = document.querySelector('.test');
+  container.innerHTML = JSON.stringify(wordLengthsTable);
 }
 
-function wordsToOneTable(storyIndex) {
-  var story = allStories[storyIndex];
-  var table = document.querySelector('.one-table');
-  story.words.forEach(function (word, i) {
-    word.senteces.forEach(function (sentence, x) {
-      var listItem = document.createElement("tr");
-      listItem.innerHTML = "\n\t\t\t\t<td>".concat(story.index, "</td>\n\t\t\t\t<td>").concat(searchWords.indexOf(word.word), "</td>\n\t\t\t\t<td>").concat(word.word, "</td>\n\t\t\t\t<td>").concat(word.count, "</td>\n\t\t\t\t<td>").concat(story.storyLength, "</td>\n\t\t\t\t<td>").concat(word.indexes[x], "</td>\n\t\t\t");
-      table.appendChild(listItem);
-      totalLines++;
-    });
-  });
-  console.log(totalLines);
+function words(sentenceArray, storyIndex, raw) {
+  var totalCount = 0; // per zin 
+
+  Object.keys(sentenceArray).forEach(function (i) {
+    var target = 'devil';
+    var sentence = sentenceArray[i];
+    var regex = new RegExp('\\b(' + target + ')\\b', 'ig', 'a');
+    var countOccurances = ((sentence || '').match(regex) || []).length; // console.log(i, countOccurances, sentence);
+
+    console.log(storyIndex);
+    var words = sentence.split(" "); // stories[storyIndex].sentences.push({
+    // 	sentence: sentence,
+    // 	index: i,
+    // 	target: target,
+    // 	count: countOccurances,
+    // 	wordCount: WordCount(sentence),
+    // 	words: words,
+    // 	wordCounts: []
+    // });
+
+    totalCount += countOccurances;
+    wordLengthsTable[storyIndex][i] = [];
+    var testWords = [];
+    wordLengthsTable[storyIndex][i].push(words.length); // words.forEach((word, wordI) => {
+    // 	wordLengthsTable[storyIndex][i].push(word.length);
+    // });
+    // 
+    // 
+    // 
+    // console.log(response);
+
+    var tempWordArray = [];
+    sentenceTable[storyIndex].wordCountPerSentence.push(words.length);
+    wordTable[storyIndex].wordCountPerSentence.push(words.length);
+    wordTable[storyIndex].wordsPerSentence.push(words); // words.forEach((word) => {
+    // 	wordTable[storyIndex].lengthPerWords.push(word.length);
+    // 	tempWordArray.push(word.length);
+    // });
+    // wordTable[storyIndex] = {
+    // 	storyId: storyIndex,
+    // 	wordCount: WordCount(sentence),
+    // 	words: words,
+    // 	wordLength: tempWordArray,
+    // }
+  }); // stories[storyIndex].totalCount = totalCount;
 }
 
-function wordsToHtml(storyIndex) {
-  var story = allStories[storyIndex];
-  var outer = document.createElement('section');
-  outer.classList.add('story-container');
-  var title = document.createElement('h3');
-  title.innerHTML = story.title;
-  var container = document.createElement("table");
-  container.classList.add("word-".concat(storyIndex));
-  container.innerHTML = "\n\t\t<tr>\n\t\t\t<th>ID</th>\n      <th>word</th>\n\t\t\t<th>count</th>\n\t\t\t<th>story length</th>\n      <th>senteces</th>\n    </tr>\n  ";
-  document.querySelector('.container').appendChild(outer);
-  outer.appendChild(title);
-  outer.appendChild(container);
-  story.words.forEach(function (word, i) {
-    var listItem = document.createElement("tr");
-    listItem.innerHTML = "\n\t\t\t<td>".concat(story.index, "</td>\n      <td>").concat(word.word, "</td>\n\t\t\t<td>").concat(word.count, "</td>\n\t\t\t<td>").concat(story.storyLength, "</td>\n\t\t\t\n\t\t\t<td class=\"sentences sentences-").concat(i, "\">\n\t\t\t\t<table>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<th>Index</th>\n\t\t\t\t\t\t<th>Sentence</th>\n\t\t\t\t\t</tr>\n\t\t\t\t</table>\n\t\t\t</td>\n\t\t");
-    document.querySelector(".word-".concat(storyIndex)).appendChild(listItem);
-    word.senteces.forEach(function (sentence, x) {
-      var item = document.createElement("tr");
-      item.innerHTML = "\n\t\t\t\t<td>".concat(word.indexes[x], "</td>\n\t\t\t\t<td>").concat(sentence, "</td>\n\t\t\t");
-      document.querySelector(".word-".concat(storyIndex, " .sentences-").concat(i, " table")).appendChild(item);
-    });
-  });
+function WordCount(str) {
+  return str.split(" ").length;
 }
 
-function sentences(i, searchFor, storyIndex) {
-  var story = allStories[storyIndex];
-  var indexes = getAllIndexes(story.storyArray, searchFor);
-  var count = indexes.length;
-  if (count === 0) return;
-  story.words.push({
-    word: searchFor,
-    count: count,
-    senteces: [],
-    indexes: indexes
-  });
-  var current = story.words.length - 1;
-  if (count === 0) return;
-  indexes.forEach(function (index) {
-    story.words[current].senteces.push("".concat(story.storyArray[index - 1], " ").concat(story.storyArray[index], " ").concat(story.storyArray[index + 1]));
-  });
-}
-
-function getAllIndexes(arr, val) {
-  var indexes = [];
-
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i] === val) indexes.push(i);
-  }
-
-  return indexes;
+function drawTable(storyId, count) {
+  var table = document.querySelector('table');
+  var listItem = document.createElement("tr");
+  var rowContent = "\n\t\t<td>\n\t\t\t".concat(storyId, "\n\t\t</td>\n\t\t<td>\n\t\t\t").concat(count, "\n\t\t</td>\n\t");
+  listItem.innerHTML = rowContent;
+  table.appendChild(listItem);
 }
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=arrayStyle.bundle.js.map
+//# sourceMappingURL=sentences.bundle.js.map

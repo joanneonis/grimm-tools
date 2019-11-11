@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/findArray/main.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/emojicount/main.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -141,10 +141,10 @@ function timeStampToTime(unix_timestamp) {
 
 /***/ }),
 
-/***/ "./tools/findArray/main.js":
-/*!*********************************!*\
-  !*** ./tools/findArray/main.js ***!
-  \*********************************/
+/***/ "./tools/emojicount/main.js":
+/*!**********************************!*\
+  !*** ./tools/emojicount/main.js ***!
+  \**********************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -152,157 +152,75 @@ function timeStampToTime(unix_timestamp) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/loadJSON */ "./helpers/loadJSON.js");
 
-var allStories = [];
-var storyIndex;
-var searchWords;
-var maxStoryCount = 20;
-var totalLines = 0;
-console.log('hallo?');
-/**
- * Load stories titles
- */
-// ! TODO to promise chain
 
-Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/filterArrays/characters-names.json', function (response) {
-  searchWords = JSON.parse(response);
-  loadIndexes();
-}, 'json');
+function handleFileSelect(evt) {
+  var files = evt.target.files; // FileList object
+  // use the 1st file from the list
 
-function loadIndexes() {
-  Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])('../../assets/stories/index.json', function (response) {
-    storyIndex = JSON.parse(response);
-    loadStories(maxStoryCount);
-  }, 'json');
+  var f = files[0];
+  var reader = new FileReader(); // Closure to capture the file information.
+
+  reader.onload = function () {
+    return function (e) {
+      // animalData = JSON.parse(e.target.result);
+      // console.log('uploaded', e.target.result);
+      countEmojis(e.target.result);
+    };
+  }(f); // Read in the image file as a data URL.
+
+
+  reader.readAsText(f);
 }
-/**
- * @param { Number } maxStories
- * Load stories from 0 to maxStories
- */
 
+document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 
-function loadStories(maxStories) {
-  var _loop = function _loop(i) {
-    Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["loadJSON"])("../../assets/stories/".concat(Object(_helpers_loadJSON__WEBPACK_IMPORTED_MODULE_0__["pad"])(i + 1, 3), ".txt"), function (response) {
-      var normalisedStory = window.nlp(response).normalize().out('text');
-      normalisedStory = normalisedStory.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?!]/g, "");
-      var storyArray = normalisedStory.toString().split(' '); // normalisedStory.replace(/\s{2,}/g," ");
+function countEmojis(data) {
+  console.log('djsf'); // var regex = new RegExp('(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])');
+  // // text = text.replace(regex, "<span class=\"highlight\" style=\"background-color: ".concat(randomColor, "\">$1</span>")); // text = text.replace(/target/g, "a");
+  // var countOccurances = ((data || '').match(regex) || []).length;
+  // console.log(countOccurances);
 
-      allStories.push({
-        title: storyIndex[i].title,
-        index: i,
-        story: response,
-        storyArray: storyArray,
-        storyLength: storyArray.length,
-        words: []
-      });
+  var freq = {};
+  data.replace(/(?:\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDEFF])/g, function (_char) {
+    return freq[_char] = (freq[_char] || 0) + 1;
+  }); // console.log(freq);
+  // sortByCount(freq);
 
-      if (i === maxStories - 1) {
-        allStories.sort(function (a, b) {
-          return a.storyLength < b.storyLength ? -1 : 1;
-        });
-        init();
-      }
-
-      ;
-    });
-  };
-
-  for (var i = 0; i < maxStories; i++) {
-    _loop(i);
-  }
-}
-/**
- * Runs when stories are loaded
- */
-
-
-function init() {
-  allStories.forEach(function (storyObj, index) {
-    startWordCounts(index); // wordsToHtml(index);
-
-    wordsToOneTable(index);
+  var arr = sortObject(freq);
+  console.log('sorted', arr);
+  arr.forEach(function (row) {
+    addToTable(row);
   });
 }
 
-function startWordCounts(storyIndex) {
-  searchWords.forEach(function (wordToSearch, index) {
-    sentences(index, wordToSearch, storyIndex);
+function sortObject(obj) {
+  var arr = [];
 
-    if (index === searchWords.length - 1) {
-      allStories[storyIndex].words.sort(function (a, b) {
-        return a.count > b.count ? -1 : 1;
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      arr.push({
+        'key': prop,
+        'value': obj[prop]
       });
     }
-  });
-}
-
-function wordsToOneTable(storyIndex) {
-  var story = allStories[storyIndex];
-  var table = document.querySelector('.one-table');
-  story.words.forEach(function (word, i) {
-    word.senteces.forEach(function (sentence, x) {
-      var listItem = document.createElement("tr");
-      listItem.innerHTML = "\n\t\t\t\t<td>".concat(story.index, "</td>\n\t\t\t\t<td>").concat(searchWords.indexOf(word.word), "</td>\n\t\t\t\t<td>").concat(word.word, "</td>\n\t\t\t\t<td>").concat(word.count, "</td>\n\t\t\t\t<td>").concat(story.storyLength, "</td>\n\t\t\t\t<td>").concat(word.indexes[x], "</td>\n\t\t\t");
-      table.appendChild(listItem);
-      totalLines++;
-    });
-  });
-  console.log(totalLines);
-}
-
-function wordsToHtml(storyIndex) {
-  var story = allStories[storyIndex];
-  var outer = document.createElement('section');
-  outer.classList.add('story-container');
-  var title = document.createElement('h3');
-  title.innerHTML = story.title;
-  var container = document.createElement("table");
-  container.classList.add("word-".concat(storyIndex));
-  container.innerHTML = "\n\t\t<tr>\n\t\t\t<th>ID</th>\n      <th>word</th>\n\t\t\t<th>count</th>\n\t\t\t<th>story length</th>\n      <th>senteces</th>\n    </tr>\n  ";
-  document.querySelector('.container').appendChild(outer);
-  outer.appendChild(title);
-  outer.appendChild(container);
-  story.words.forEach(function (word, i) {
-    var listItem = document.createElement("tr");
-    listItem.innerHTML = "\n\t\t\t<td>".concat(story.index, "</td>\n      <td>").concat(word.word, "</td>\n\t\t\t<td>").concat(word.count, "</td>\n\t\t\t<td>").concat(story.storyLength, "</td>\n\t\t\t\n\t\t\t<td class=\"sentences sentences-").concat(i, "\">\n\t\t\t\t<table>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<th>Index</th>\n\t\t\t\t\t\t<th>Sentence</th>\n\t\t\t\t\t</tr>\n\t\t\t\t</table>\n\t\t\t</td>\n\t\t");
-    document.querySelector(".word-".concat(storyIndex)).appendChild(listItem);
-    word.senteces.forEach(function (sentence, x) {
-      var item = document.createElement("tr");
-      item.innerHTML = "\n\t\t\t\t<td>".concat(word.indexes[x], "</td>\n\t\t\t\t<td>").concat(sentence, "</td>\n\t\t\t");
-      document.querySelector(".word-".concat(storyIndex, " .sentences-").concat(i, " table")).appendChild(item);
-    });
-  });
-}
-
-function sentences(i, searchFor, storyIndex) {
-  var story = allStories[storyIndex];
-  var indexes = getAllIndexes(story.storyArray, searchFor);
-  var count = indexes.length;
-  if (count === 0) return;
-  story.words.push({
-    word: searchFor,
-    count: count,
-    senteces: [],
-    indexes: indexes
-  });
-  var current = story.words.length - 1;
-  if (count === 0) return;
-  indexes.forEach(function (index) {
-    story.words[current].senteces.push("".concat(story.storyArray[index - 1], " ").concat(story.storyArray[index], " ").concat(story.storyArray[index + 1]));
-  });
-}
-
-function getAllIndexes(arr, val) {
-  var indexes = [];
-
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i] === val) indexes.push(i);
   }
 
-  return indexes;
+  arr.sort(function (a, b) {
+    return a.value > b.value ? -1 : 1;
+  }); //arr.sort(function(a, b) { a.value.toLowerCase().localeCompare(b.value.toLowerCase()); }); //use this to sort as strings
+
+  return arr; // returns array
+} // return a.storyLength < b.storyLength ? -1 : 1;
+
+
+function addToTable(row) {
+  var table = document.querySelector('table');
+  var tr = document.createElement('tr');
+  tr.innerHTML = "\n\t\t<td>".concat(row.key, "</td>\n\t\t<td>").concat(row.value, "</td>\n\t");
+  table.appendChild(tr);
 }
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=arrayStyle.bundle.js.map
+//# sourceMappingURL=emoji.bundle.js.map

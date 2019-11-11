@@ -1,13 +1,12 @@
 // sentences()
 import { loadJSON, pad } from '../../helpers/loadJSON';
 
-let storyCount = 209;
+let storyCount = 2;
 let stories = {};
 
 let paragrahTable = {};
 let sentenceTable = {};
 let wordTable = {};
-let wordLengthsTable = {};
 
 for (let i = 0; i < storyCount; i++) {
   loadJSON(`../../assets/stories/${pad(i + 1, 3)}.txt`, function(response) {
@@ -15,6 +14,18 @@ for (let i = 0; i < storyCount; i++) {
 		normalisedStory = normalisedStory.replace(/[,\/#!$%\^&\*;:{}=\-_`~()?!]/g,"");
 
     let compromise = window.nlp(normalisedStory).normalize().sentences().data();
+    // let compromise = window.nlp(response).normalize().topics().slice(0, 50).out('frequency');
+    // storiesAnalysed.push(compromise);
+		// console.log(compromise); 
+
+		// stories[i] = {
+		// 	sentenceCount: compromise.length,
+		// 	sentences: [],
+		// 	paragraphCount: paragraphTest,
+		// };
+
+		// drawTable(i + 1, paragraphTest);
+
 		var paragraphTest = (response.match(/[\r\n]{2,}/gm) || '').length + 1;
 		var paragraphs = (response.split(/[\r\n]{2,}/gm));
 
@@ -27,47 +38,63 @@ for (let i = 0; i < storyCount; i++) {
 
 		var test = [];
 
-		wordLengthsTable[i] = {
+		paragraphs.forEach((paragraph, x) => {
+			// console.log(x, paragraph);
+			test.push(window.nlp(paragraph).sentences().data().length);
+		});
+		paragrahTable[i].sentencesPerParagraph = test;
+		console.log(JSON.stringify(paragrahTable));
+
+		// container.innerHTML = JSON.stringify(wordTable[i].superDuperTest);
+		
+
+		// paragrahTable[i] = {
+		// 	storyId: i,
+		// 	paragraphCount: paragraphTest,
+		// 	sentenceCount: compromise.length,
+		// };
+
+		sentenceTable[i] = {
 			storyId: i,
-			wordCountsPerSentence: [],
+			sentenceCount: compromise.length,
+			sentences: compromise,
+			wordCountPerSentence: [],
 		}
 
-		paragraphs.forEach((paragraph, x) => {
-			test.push(window.nlp(paragraph).sentences().data().length);
+		wordTable[i] = {
+			storyId: i,
+			wordCountPerSentence: [],
+			lengthPerWords: [],
+			wordsPerSentence: [],
+			superDuperTest: [],
+		}
 
-			//? Word stuff
-			// wordLengthsTable[i].wordCountsPerSentence.push([]);
-			// wordsPerSentence(window.nlp(paragraph).sentences().data().length, i , x, window.nlp(paragraph).sentences().data());
-		});
+		
+		//! cool stuff
+		words(compromise, i, response);
 
-		paragrahTable[i].sentencesPerParagraph = test;
-		var container = document.querySelector('.test');
-		container.innerHTML = JSON.stringify(paragrahTable);
+		//! ONDLKJS
+		// console.log(stories); // 11
+
+		// console.log('paragrah', paragrahTable, 'sentences', sentenceTable, 'words', wordTable);
+
+		// var container = document.querySelector('.test');
+		// container.innerHTML = JSON.stringify(paragrahTable);
 	});
-}
-
-function wordsPerSentence(lenght, i, x, sentences) {
-	// wordLengthsTable[i][x]
-	Object.keys(sentences).forEach((z) => {
-		var normalisedSentence = sentences[z].normal;
-		var words = normalisedSentence.split(" ");
-
-		wordLengthsTable[i].wordCountsPerSentence[x][z] = words.length;
-		// console.log(i, x, lenght, words.length);
-	});
-
-	console.log(wordLengthsTable);
+	
 	var container = document.querySelector('.test');
-	container.innerHTML = JSON.stringify(wordLengthsTable);
+	// container.innerHTML = JSON.stringify(wordTable[i].superDuperTest);
+
 }
 
+// per verhaal
 function words(sentenceArray, storyIndex, raw) {
 	var totalCount = 0;
 
 	// per zin 
 	Object.keys(sentenceArray).forEach((i) => {
 		var target = 'devil';
-		var sentence = sentenceArray[i];
+		var sentence = sentenceArray[i].normal;
 
 		var regex = new RegExp('\\b(' + target + ')\\b', 'ig', 'a');
 		var countOccurances = ((sentence || '').match(regex) || []).length;
@@ -89,12 +116,11 @@ function words(sentenceArray, storyIndex, raw) {
 
 		totalCount += countOccurances;
 
-		wordLengthsTable[storyIndex][i] = [];
 		var testWords = [];
-		wordLengthsTable[storyIndex][i].push(words.length);
-		// words.forEach((word, wordI) => {
-		// 	wordLengthsTable[storyIndex][i].push(word.length);
-		// });
+		wordTable[storyIndex].superDuperTest.push(testWords);
+		words.forEach((word, wordI) => {
+			wordTable[storyIndex].superDuperTest[i].push(word.length);
+		});
 
 	// 
 	// 

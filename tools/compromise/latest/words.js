@@ -35,15 +35,15 @@ for (let i = 0; i < storyCount; i++) {
 		paragraphs.forEach((paragraph, x) => {
 			test.push(window.nlp(paragraph).sentences().data().length);
 
-			//? Word stuff
-			// wordLengthsTable[i].wordCountsPerSentence.push([]);
-			// wordsPerSentence(window.nlp(paragraph).sentences().data().length, i , x, window.nlp(paragraph).sentences().data());
+			wordLengthsTable[i].wordCountsPerSentence.push([]);
+			wordsPerSentence(window.nlp(paragraph).sentences().data().length, i , x, window.nlp(paragraph).sentences().data());
 		});
 
 		paragrahTable[i].sentencesPerParagraph = test;
-		var container = document.querySelector('.test');
-		container.innerHTML = JSON.stringify(paragrahTable);
 	});
+	
+	// var container = document.querySelector('.test');
+	// container.innerHTML = JSON.stringify();
 }
 
 function wordsPerSentence(lenght, i, x, sentences) {
