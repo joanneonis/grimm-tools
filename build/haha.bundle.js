@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/emojicount/main.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./tools/haha/main.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -141,10 +141,10 @@ function timeStampToTime(unix_timestamp) {
 
 /***/ }),
 
-/***/ "./tools/emojicount/main.js":
-/*!**********************************!*\
-  !*** ./tools/emojicount/main.js ***!
-  \**********************************/
+/***/ "./tools/haha/main.js":
+/*!****************************!*\
+  !*** ./tools/haha/main.js ***!
+  \****************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -175,8 +175,9 @@ function handleFileSelect(evt) {
 document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 
 function countEmojis(data) {
-  var freq = {};
-  data.replace(/(?:\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDEFF])/g, function (_char) {
+  var freq = {}; // data.replace(/[\u{1F300}-\u{1F6FF}]/gu, char => freq[char] = (freq[char] || 0) + 1);
+
+  data.replace(/(ha){2,15}/g, function (_char) {
     return freq[_char] = (freq[_char] || 0) + 1;
   });
   var arr = sortObject(freq);
@@ -258,4 +259,4 @@ function uniqueCount(string) {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=emoji.bundle.js.map
+//# sourceMappingURL=haha.bundle.js.map

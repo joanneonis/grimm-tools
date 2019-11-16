@@ -9,6 +9,7 @@ export default {
       arrayStyle: path.join(__dirname, './tools/findArray/main.js'),
       sentences: path.join(__dirname, './tools/compromise/main.js'),
       emoji: path.join(__dirname, './tools/emojicount/main.js'),
+      haha: path.join(__dirname, './tools/haha/main.js'),
     },
     output: {
         path: path.join(__dirname, 'build'),

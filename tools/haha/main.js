@@ -27,7 +27,8 @@ document.getElementById('upload').addEventListener('change', handleFileSelect, f
 
 function countEmojis(data) {
 	let freq = {};
-	data.replace(/[\u{1F300}-\u{1F6FF}]/gu, char => freq[char] = (freq[char] || 0) + 1);
+	// data.replace(/[\u{1F300}-\u{1F6FF}]/gu, char => freq[char] = (freq[char] || 0) + 1);
+	data.replace(/(ha){2,15}/g, char => freq[char] = (freq[char] || 0) + 1);
 
 	var arr = sortObject(freq);
 
