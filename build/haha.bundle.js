@@ -383,7 +383,7 @@ function countFinal(yearArray) {
     months.forEach(function (month) {
       var data = yearArray[year][month].map(function (a) {
         return a.message;
-      }).join('');
+      }).join('').toLowerCase();
       var freq = {};
       data.replace(/(ha){2,35}/g, function (_char2) {
         return freq[_char2] = (freq[_char2] || 0) + 1;

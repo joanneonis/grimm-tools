@@ -267,7 +267,7 @@ function countFinal(yearArray) {
 
 
 		months.forEach((month) => {
-			var data = yearArray[year][month].map((a) => a.message).join('');
+			var data = yearArray[year][month].map((a) => a.message).join('').toLowerCase();
 			let freq = {};
 			data.replace(/(ha){2,35}/g, char => freq[char] = (freq[char] || 0) + 1);
 
