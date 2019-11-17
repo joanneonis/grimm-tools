@@ -10,7 +10,7 @@ function handleFileSelect(evt) {
 	var reader = new FileReader();
 
 	// Closure to capture the file information.
-	reader.onload = (() => {
+	reader.onloadend = (() => {
 			return function(e) {
 				// haha
 				// countEmojis(e.target.result);
