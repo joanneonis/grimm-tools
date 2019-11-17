@@ -18,17 +18,36 @@
 		body {
 				font-family: sans-serif;
 		}
+
+		td {
+				width: 40px;
+		}
+
+		tr {
+				vertical-align: top;
+		}
+
+		table table td {
+				width: 320px;
+				background: #fff!important;
+		}
+
+		.container > table > tr > td:nth-child(3) {
+				width: 320px;
+		}
 	</style>
 </head>
 <body>
 	<input type="file" id="upload" name="upload">
 
-	<table>
+
+	<div class="container"></div>
+	<!-- <table>
 		<tr>
 			<th>Haha</th>
 			<th>Count</th>
 		</tr>
-	</table>
+	</table> -->
 
 	<script src="../../_temp/compromise.min.js"></script>
 	<script src="../../build/haha.bundle.js"></script>
